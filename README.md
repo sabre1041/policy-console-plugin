@@ -19,7 +19,7 @@ The following parameters are required:
 
 ```shell
 oc process -f template.yaml \
-  -p NAMESPACE=<NAMESPACE> \
+  -p NAMESPACE=policy-console-plugin \
   -p IMAGE=quay.io/ablock/policy-console-plugin:latest \
   | oc create -f -
 ```
