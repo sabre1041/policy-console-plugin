@@ -11,18 +11,18 @@ metadata:
     iconClass: icon-nginx
     tags: openshift,console,plugin,nginx
 parameters:
-- description: Name of your plugin. This name must match the name in the consolePlugin declaration in package.json.
-  name: PLUGIN_NAME
-  value: console-plugin-template
-  required: true
-- description: Namespace for your plugin. The namespace will be created by the template.
-  name: NAMESPACE
-  value: console-plugin-template
-  required: true
-- description: Container image of the plugin.
-  name: IMAGE
-  value: quay.io/spadgett/console-plugin-template:latest
-  required: true
+  - description: Name of your plugin. This name must match the name in the consolePlugin declaration in package.json.
+    name: PLUGIN_NAME
+    value: policy-console-plugin
+    required: true
+  - description: Namespace for your plugin. The namespace will be created by the template.
+    name: NAMESPACE
+    value: PLUGIN_NAME
+    required: true
+  - description: Container image of the plugin.
+    name: IMAGE
+    value: quay.io/spadgett/console-plugin-template:latest
+    required: true
 message: >-
   To enable the plugin on the cluster, run the following command:
 
@@ -33,31 +33,31 @@ objects:
   - apiVersion: v1
     kind: Namespace
     metadata:
-      name: '${NAMESPACE}'
+      name: "${NAMESPACE}"
   - apiVersion: apps/v1
     kind: Deployment
     metadata:
-      name: '${PLUGIN_NAME}'
-      namespace: '${NAMESPACE}'
+      name: "${PLUGIN_NAME}"
+      namespace: "${NAMESPACE}"
       labels:
-        app: '${PLUGIN_NAME}'
-        app.kubernetes.io/component: '${PLUGIN_NAME}'
-        app.kubernetes.io/instance: '${PLUGIN_NAME}'
-        app.kubernetes.io/part-of: '${PLUGIN_NAME}'
-        app.openshift.io/runtime-namespace: '${NAMESPACE}'
+        app: "${PLUGIN_NAME}"
+        app.kubernetes.io/component: "${PLUGIN_NAME}"
+        app.kubernetes.io/instance: "${PLUGIN_NAME}"
+        app.kubernetes.io/part-of: "${PLUGIN_NAME}"
+        app.openshift.io/runtime-namespace: "${NAMESPACE}"
     spec:
       replicas: 2
       selector:
         matchLabels:
-          app: '${PLUGIN_NAME}'
+          app: "${PLUGIN_NAME}"
       template:
         metadata:
           labels:
-            app: '${PLUGIN_NAME}'
+            app: "${PLUGIN_NAME}"
         spec:
           containers:
-            - name: '${PLUGIN_NAME}'
-              image: '${IMAGE}'
+            - name: "${PLUGIN_NAME}"
+              image: "${IMAGE}"
               ports:
                 - containerPort: 9443
                   protocol: TCP
@@ -66,11 +66,11 @@ objects:
                 allowPrivilegeEscalation: false
                 capabilities:
                   drop:
-                  - ALL
+                    - ALL
               resources:
-                  requests:
-                    cpu: 10m
-                    memory: 50Mi
+                requests:
+                  cpu: 10m
+                  memory: 50Mi
               volumeMounts:
                 - name: plugin-serving-cert
                   readOnly: true
@@ -90,10 +90,7 @@ objects:
                 defaultMode: 420
           restartPolicy: Always
           dnsPolicy: ClusterFirst
-          securityContext:
-            runAsNonRoot: true
-            seccompProfile:
-              type: RuntimeDefault
+          securityContext: {}
       strategy:
         type: RollingUpdate
         rollingUpdate:
@@ -103,10 +100,10 @@ objects:
     kind: ConfigMap
     metadata:
       name: nginx-conf
-      namespace: '${NAMESPACE}'
+      namespace: "${NAMESPACE}"
       labels:
-        app: '${PLUGIN_NAME}'
-        app.kubernetes.io/part-of: '${PLUGIN_NAME}'
+        app: "${PLUGIN_NAME}"
+        app.kubernetes.io/part-of: "${PLUGIN_NAME}"
     data:
       nginx.conf: |
         error_log /dev/stdout info;
@@ -128,13 +125,13 @@ objects:
     metadata:
       annotations:
         service.alpha.openshift.io/serving-cert-secret-name: plugin-serving-cert
-      name: '${PLUGIN_NAME}'
-      namespace: '${NAMESPACE}'
+      name: "${PLUGIN_NAME}"
+      namespace: "${NAMESPACE}"
       labels:
-        app: '${PLUGIN_NAME}'
-        app.kubernetes.io/component: '${PLUGIN_NAME}'
-        app.kubernetes.io/instance: '${PLUGIN_NAME}'
-        app.kubernetes.io/part-of: '${PLUGIN_NAME}'
+        app: "${PLUGIN_NAME}"
+        app.kubernetes.io/component: "${PLUGIN_NAME}"
+        app.kubernetes.io/instance: "${PLUGIN_NAME}"
+        app.kubernetes.io/part-of: "${PLUGIN_NAME}"
     spec:
       ports:
         - name: 9443-tcp
@@ -142,17 +139,17 @@ objects:
           port: 9443
           targetPort: 9443
       selector:
-        app: '${PLUGIN_NAME}'
+        app: "${PLUGIN_NAME}"
       type: ClusterIP
       sessionAffinity: None
   - apiVersion: console.openshift.io/v1alpha1
     kind: ConsolePlugin
     metadata:
-      name: '${PLUGIN_NAME}'
+      name: "${PLUGIN_NAME}"
     spec:
-      displayName: 'Console Plugin Template'
+      displayName: "Console Plugin Template"
       service:
-        name: '${PLUGIN_NAME}'
-        namespace: '${NAMESPACE}'
+        name: "${PLUGIN_NAME}"
+        namespace: "${NAMESPACE}"
         port: 9443
-        basePath: '/'
+        basePath: "/"

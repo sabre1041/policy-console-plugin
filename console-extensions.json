@@ -1,20 +1,97 @@
 [
   {
+    "type": "console.flag/model",
+    "properties": {
+      "flag": "CLUSTERPOLICYREPORT_FLAG",
+      "model": {
+        "group": "wgpolicyk8s.io",
+        "version": "v1alpha2",
+        "kind": "ClusterPolicyReport"
+      }
+    }
+  },
+  {
+    "type": "console.flag/model",
+    "properties": {
+      "flag": "POLICYREPORT_FLAG",
+      "model": {
+        "group": "wgpolicyk8s.io",
+        "version": "v1alpha2",
+        "kind": "PolicyReport"
+      }
+    }
+  },
+  {
+    "type": "console.navigation/section",
+    "properties": {
+      "id": "policies-section",
+      "insertAfter": "observe",
+      "perspective": "admin",
+      "name": "%plugin__policy-console-plugin~Policies%"
+    }
+  },
+  {
     "type": "console.page/route",
+    "flags": {
+      "required": [
+        "CLUSTERPOLICYREPORT_FLAG"
+      ]
+    },
     "properties": {
       "exact": true,
-      "path": "/example",
-      "component": { "$codeRef": "ExamplePage" }
+      "path": "/cpolicyreport",
+      "component": {
+        "$codeRef": "ClusterPolicyReport"
+      }
+    }
+  },
+  {
+    "type": "console.page/route",
+    "flags": {
+      "required": [
+        "POLICYREPORT_FLAG"
+      ]
+    },
+    "properties": {
+      "exact": true,
+      "path": [
+        "/k8s/ns/:ns/policyreport",
+        "/k8s/all-namespaces/policyreport"
+      ],
+      "component": {
+        "$codeRef": "PolicyReport"
+      }
     }
   },
   {
     "type": "console.navigation/href",
+    "flags": {
+      "required": [
+        "CLUSTERPOLICYREPORT_FLAG"
+      ]
+    },
     "properties": {
-      "id": "example",
-      "name": "Plugin Example",
-      "href": "/example",
+      "id": "clusterpolicyreport",
+      "name": "%plugin__policy-console-plugin~ClusterPolicyReport%",
+      "href": "/cpolicyreport",
       "perspective": "admin",
-      "section": "home"
+      "section": "policies-section"
+    }
+  },
+  {
+    "type": "console.navigation/href",
+    "flags": {
+      "required": [
+        "POLICYREPORT_FLAG"
+      ]
+    },
+    "properties": {
+      "id": "policyreport",
+      "name": "%plugin__policy-console-plugin~PolicyReport%",
+      "href": "/policyreport",
+      "prefixNamespaced": true,
+      "perspective": "admin",
+      "section": "policies-section"
     }
   }
 ]

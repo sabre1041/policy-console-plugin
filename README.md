@@ -1,48 +1,39 @@
-# OpenShift Console Plugin Template
+# OpenShift Policy Console Plugin
 
-This project is a minimal template for writing a new OpenShift Console dynamic
-plugin. It requires OpenShift 4.10.
+OpenShift [Dynamic Console Plugin](https://docs.openshift.com/container-platform/4.10/web_console/dynamic-plug-ins.html) that exposes policy management tools.
 
-[Dynamic plugins](https://github.com/openshift/console/tree/master/frontend/packages/console-dynamic-plugin-sdk)
-allow you to extend the
-[OpenShift UI](https://github.com/openshift/console)
-at runtime, adding custom pages and other extensions. They are based on
-[webpack module federation](https://webpack.js.org/concepts/module-federation/).
-Plugins are registered with console using the `ConsolePlugin` custom resource
-and enabled in the console operator config by a cluster administrator.
+Supported tools:
 
-[Node.js](https://nodejs.org/en/) and [yarn](https://yarnpkg.com) are required
-to build and run the example. To run OpenShift console in a container, either
-[Docker](https://www.docker.com) or [podman 3.2.0+](https://podman.io) and
-[oc](https://console.redhat.com/openshift/downloads) are required.
+* [Kyverno](https://kyverno.io/)
 
-## Getting started
+## Deployment to a Cluster
 
-After cloning this repo, you should update the plugin metadata such as the
-plugin name in the `consolePlugin` declaration of [package.json](package.json).
+Use the following steps to deploy the plugin to your OpenShift Cluster.
 
-```json
-"consolePlugin": {
-  "name": "my-plugin",
-  "version": "0.0.1",
-  "displayName": "My Plugin",
-  "description": "Enjoy this shiny, new console plugin!",
-  "exposedModules": {
-    "ExamplePage": "./components/ExamplePage"
-  },
-  "dependencies": {
-    "@console/pluginAPI": "*"
-  }
-}
+An OpenShift template ([template.yaml](template.yaml)) has been provided to deploy the plugin to an OpenShift cluster.
+
+The following parameters are required:
+
+* `NAMESPACE` - The name of the namespace that should be created and where the plugin should be deployed
+* `IMAGE` - The location of the image containing the plugin
+
+```shell
+oc process -f template.yaml \
+  -p NAMESPACE=<NAMESPACE> \
+  -p IMAGE=quay.io/ablock/policy-console-plugin:latest \
+  | oc create -f -
 ```
 
-The template adds a single example page in the Home navigation section. The
-extension is declared in the [console-extensions.json](console-extensions.json)
-file and the React component is declared in
-[src/components/ExamplePage.tsx](src/components/ExamplePage.tsx).
+Once deployed, patch the
+[Console operator](https://github.com/openshift/console-operator)
+config to enable the plugin.
 
-You can run the plugin using a local development environment or build an image
-to deploy it to a cluster.
+```shell
+oc patch consoles.operator.openshift.io cluster \
+  --patch '{ "spec": { "plugins": ["policy-console-plugin"] } }' --type=merge
+```
+
+The plugin becomes activated as soon as one of the supported tools is available in the cluster. A _Policies_ tab will be available on the Administrator perspective of the OpenShift Console.
 
 ## Development
 
@@ -104,14 +95,19 @@ Before you can deploy your plugin on a cluster, you must build an image and
 push it to an image registry.
 
 1. Build the image:
+
    ```sh
    docker build -t quay.io/my-repositroy/my-plugin:latest .
    ```
+
 2. Run the image:
+
    ```sh
    docker run -it --rm -d -p 9001:80 quay.io/my-repository/my-plugin:latest
    ```
+
 3. Push the image:
+
    ```sh
    docker push quay.io/my-repository/my-plugin:latest
    ```
@@ -119,53 +115,3 @@ push it to an image registry.
 NOTE: If you have a Mac with Apple silicon, you will need to add the flag
 `--platform=linux/amd64` when building the image to target the correct platform
 to run in-cluster.
-
-## Deployment on cluster
-
-After pushing an image with your changes to a registry, you can deploy the
-plugin to a cluster by instantiating the provided
-[OpenShift template](template.yaml). It will run a light-weight nginx HTTP
-server to serve your plugin's assets.
-
-```sh
-oc process -f template.yaml \
-  -p PLUGIN_NAME=my-plugin \
-  -p NAMESPACE=my-plugin-namespace \
-  -p IMAGE=quay.io/my-repository/my-plugin:latest \
-  | oc create -f -
-```
-
-`PLUGIN_NAME` must match the plugin name you used in the `consolePlugin`
-declaration of [package.json](package.json).
-
-Once deployed, patch the
-[Console operator](https://github.com/openshift/console-operator)
-config to enable the plugin.
-
-```sh
-oc patch consoles.operator.openshift.io cluster \
-  --patch '{ "spec": { "plugins": ["my-plugin"] } }' --type=merge
-```
-
-## Linting
-
-This project adds prettier, eslint, and stylelint. Linting can be run with
-`yarn run lint`.
-
-The stylelint config disallows hex colors since these cause problems with dark
-mode (starting in OpenShift console 4.11). You should use the
-[PatternFly global CSS variables](https://patternfly-react-main.surge.sh/developer-resources/global-css-variables#global-css-variables)
-for colors instead.
-
-The stylelint config also disallows naked element selectors like `table` and
-`.pf-` or `.co-` prefixed classes. This prevents plugins from accidentally
-overwriting default console styles, breaking the layout of existing pages. The
-best practice is to prefix your CSS classnames with your plugin name to avoid
-conflicts. Please don't disable these rules without understanding how they can
-break console styles!
-
-## References
-
-- [Console Plugin SDK README](https://github.com/openshift/console/tree/master/frontend/packages/console-dynamic-plugin-sdk)
-- [Customization Plugin Example](https://github.com/spadgett/console-customization-plugin)
-- [Dynamic Plugin Enhancement Proposal](https://github.com/openshift/enhancements/blob/master/enhancements/console/dynamic-plugins.md)
