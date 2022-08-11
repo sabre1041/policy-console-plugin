@@ -3,13 +3,13 @@ import { K8sModel } from "@openshift-console/dynamic-plugin-sdk/lib/api/common-t
 
 
 export const policyReportKind: K8sGroupVersionKind = {
-    version: 'v1alpha1',
+    version: 'v1alpha2',
     group: 'wgpolicyk8s.io',
     kind: 'PolicyReport',
 };
 
 export const clusterPolicyReportKind: K8sGroupVersionKind = {
-    version: 'v1alpha1',
+    version: 'v1alpha2',
     group: 'wgpolicyk8s.io',
     kind: 'ClusterPolicyReport',
 };
