@@ -54,8 +54,9 @@
     "displayName": "OpenShift Policy Console Plugin",
     "description": "OpenShift Console Plugin for managing policies.",
     "exposedModules": {
-      "ClusterPolicyReport": "./components/ClusterPolicyReport",
-      "PolicyReport": "./components/PolicyReport"
+      "ClusterPolicyReports": "./components/ClusterPolicyReports",
+      "PolicyReports": "./components/PolicyReports",
+      "features": "./features/features"
     },
     "dependencies": {
       "@console/pluginAPI": "*"

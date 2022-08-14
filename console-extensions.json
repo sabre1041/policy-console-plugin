@@ -22,10 +22,18 @@
     }
   },
   {
+    "type": "console.flag",
+    "properties": {
+      "handler": {
+        "$codeRef": "features.detectAccessClusterPolicyReport"
+      }
+    }
+  },
+  {
     "type": "console.navigation/section",
     "properties": {
       "id": "policies-section",
-      "insertAfter": "observe",
+      "insertAfter": "builds",
       "perspective": "admin",
       "name": "%plugin__policy-console-plugin~Policies%"
     }
@@ -34,14 +42,15 @@
     "type": "console.page/route",
     "flags": {
       "required": [
-        "CLUSTERPOLICYREPORT_FLAG"
+        "CLUSTERPOLICYREPORT_FLAG",
+        "CLUSTERPOLICYREPORT_ACCESS_FLAG"
       ]
     },
     "properties": {
       "exact": true,
-      "path": "/cpolicyreport",
+      "path": "/cpolicyreports",
       "component": {
-        "$codeRef": "ClusterPolicyReport"
+        "$codeRef": "ClusterPolicyReports"
       }
     }
   },
@@ -55,11 +64,11 @@
     "properties": {
       "exact": true,
       "path": [
-        "/k8s/ns/:ns/policyreport",
-        "/k8s/all-namespaces/policyreport"
+        "/k8s/ns/:ns/policyreports",
+        "/k8s/all-namespaces/policyreports"
       ],
       "component": {
-        "$codeRef": "PolicyReport"
+        "$codeRef": "PolicyReports"
       }
     }
   },
@@ -67,13 +76,14 @@
     "type": "console.navigation/href",
     "flags": {
       "required": [
-        "CLUSTERPOLICYREPORT_FLAG"
+        "CLUSTERPOLICYREPORT_FLAG",
+        "CLUSTERPOLICYREPORT_ACCESS_FLAG"
       ]
     },
     "properties": {
-      "id": "clusterpolicyreport",
+      "id": "clusterpolicyreports",
       "name": "%plugin__policy-console-plugin~ClusterPolicyReport%",
-      "href": "/cpolicyreport",
+      "href": "/cpolicyreports",
       "perspective": "admin",
       "section": "policies-section"
     }
@@ -86,9 +96,9 @@
       ]
     },
     "properties": {
-      "id": "policyreport",
+      "id": "policyreports",
       "name": "%plugin__policy-console-plugin~PolicyReport%",
-      "href": "/policyreport",
+      "href": "/policyreports",
       "prefixNamespaced": true,
       "perspective": "admin",
       "section": "policies-section"
