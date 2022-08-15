@@ -1,7 +1,6 @@
 {
-    "Policies": "Policies",
-    "PolicyReport": "PolicyReport",
-    "ClusterPolicyReport": "ClusterPolicyReport",
-    "No PolicyReports found": "No PolicyReports found",
-    "No ClusterPolicyReports found": "No ClusterPolicyReports found"
+  "No ClusterPolicyReports found": "No ClusterPolicyReports found",
+  "No PolicyReports found": "No PolicyReports found",
+  "ClusterPolicyReport": "ClusterPolicyReport",
+  "No PolicyReport found": "No PolicyReport found"
 }
