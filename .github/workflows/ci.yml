@@ -1,0 +1,73 @@
+name: CI
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+    tags:
+      - v*
+
+env:
+  DEFAULT_IMAGE: "quay.io/ablock/policy-console-plugin"
+  PUSH_BRANCH: "main"
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setting Workflow Variables
+        id: set-workflow-variables
+        run: |
+          echo "::set-output name=image_repository_name::${DEFAULT_IMAGE##*/}"
+          echo "::set-output name=image_registry_name::${DEFAULT_IMAGE%/*}"
+
+          TAG_EVENT='false'
+          PUSH_EVENT='false'
+
+          # Set versions based on presence of tag
+          if [[ "${{ github.ref }}" =~ ^refs/tags/ ]]; then
+            TAG="${GITHUB_REF/refs\/tags\//}"
+            TAG_EVENT='true'
+            echo "::set-output name=image_version::$TAG"
+          else
+            echo "::set-output name=image_version::latest"
+          fi
+
+          # Set Push Event
+          if [ "${{ secrets.REGISTRY_USERNAME }}" != "" ] && [ "${{ secrets.REGISTRY_PASSWORD }}" != "" ]; then
+            BRANCH_NAME="$(echo ${GITHUB_REF#refs/heads/})"
+
+            if [ "$BRANCH_NAME" == "${{ env.PUSH_BRANCH }}" ] || [ "$TAG_EVENT" == "true" ]; then
+              PUSH_EVENT='true'
+            fi
+          fi
+
+          echo "::set-output name=tag_event::$TAG_EVENT"
+          echo "::set-output name=push_event::$PUSH_EVENT"
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Registry
+        if: ${{ steps.set-workflow-variables.outputs.push_event == 'true' }}
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ steps.set-workflow-variables.outputs.image_registry_name }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: "Build Image"
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: "./Dockerfile"
+          push: ${{ steps.set-workflow-variables.outputs.push_event == 'true' }}
+          tags: "${{ env.DEFAULT_IMAGE }}:latest,${{ env.DEFAULT_IMAGE }}:${{ steps.set-workflow-variables.outputs.image_version }}"
