@@ -20,8 +20,15 @@ jobs:
       - name: Setting Workflow Variables
         id: set-workflow-variables
         run: |
-          echo "::set-output name=image_repository_name::${DEFAULT_IMAGE##*/}"
-          echo "::set-output name=image_registry_name::${DEFAULT_IMAGE%/*}"
+
+          IMAGE=${{ env.DEFAULT_IMAGE }}
+
+          if [ "${{ secrets.IMAGE }}" != "" ]; then
+            IMAGE=${{ secrets.IMAGE }}
+          fi
+
+          echo "::set-output name=image_repository_name::${IMAGE##*/}"
+          echo "::set-output name=image_registry_name::${IMAGE%/*}"
 
           TAG_EVENT='false'
           PUSH_EVENT='false'
