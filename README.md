@@ -8,29 +8,20 @@ Supported tools:
 
 ## Deployment to a Cluster
 
-Use the following steps to deploy the plugin to your OpenShift Cluster.
+A [Helm](https://helm.sh) chart is available to deploy the plugin to an OpenShift environment.
 
-An OpenShift template ([template.yaml](template.yaml)) has been provided to deploy the plugin to an OpenShift cluster.
+The following Helm parameters are required:
 
-The following parameters are required:
+`plugin.image`: The location of the image containing the plugin
 
-* `NAMESPACE` - The name of the namespace that should be created and where the plugin should be deployed
-* `IMAGE` - The location of the image containing the plugin
+Additional parameters can be specified if desired. Consult the chart [values](charts/openshift-console-plugin/values.yaml) file for the full set of supported parameters.
 
-```shell
-oc process -f template.yaml \
-  -p NAMESPACE=policy-console-plugin \
-  -p IMAGE=quay.io/ablock/policy-console-plugin:latest \
-  | oc create -f -
-```
+### Installing the Helm Chart
 
-Once deployed, patch the
-[Console operator](https://github.com/openshift/console-operator)
-config to enable the plugin.
+Execute the following to install the chart to a namespace called `policy-console-plugin`.
 
 ```shell
-oc patch consoles.operator.openshift.io cluster \
-  --patch '{ "spec": { "plugins": ["policy-console-plugin"] } }' --type=merge
+helm upgrade -i -n policy-console-plugin charts/openshift-console-plugin --create-namespace
 ```
 
 The plugin becomes activated as soon as one of the supported tools is available in the cluster. A _Policies_ tab will be available on the Administrator perspective of the OpenShift Console.
