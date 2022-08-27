@@ -18,11 +18,13 @@ Additional parameters can be specified if desired. Consult the chart [values](ch
 
 ### Installing the Helm Chart
 
-Execute the following to install the chart to a namespace called `policy-console-plugin`.
+Install the chart by executing the following command. Substitute the `plugin.image` parameter with the location of your own image if desired:
 
 ```shell
-helm upgrade -i -n policy-console-plugin charts/openshift-console-plugin --create-namespace
+helm upgrade -i policy-console-plugin charts/openshift-console-plugin -n policy-console-plugin --create-namespace --set plugin.image=quay.io/ablock/policy-console-plugin:latest
 ```
+
+NOTE: When deploying on OpenShift 4.10, it is recommended to add the parameter `--set plugin.securityContext.enabled=false` which will omit configurations related to Pod Security.
 
 The plugin becomes activated as soon as one of the supported tools is available in the cluster. A _Policies_ tab will be available on the Administrator perspective of the OpenShift Console.
 
